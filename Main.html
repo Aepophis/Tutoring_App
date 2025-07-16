@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <title>Tutoring Tracker v5 with Tabs</title>
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #eef2f7;
+      margin: 0; padding: 0;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Tabs container */
+    #mainTabs {
+      display: flex;
+      background: #f0f3f7;
+      border-bottom: 2px solid #ddd;
+      user-select: none;
+    }
+    #mainTabs button {
+      flex-grow: 1;
+      padding: 14px 0;
+      font-weight: 700;
+      border: none;
+      border-bottom: 3px solid transparent;
+      background: transparent;
+      color: #7f8c8d;
+      cursor: pointer;
+      transition: border-color 0.3s ease, color 0.3s ease;
+      font-size: 16px;
+    }
+    #mainTabs button:focus {
+      outline: 3px solid #3498db;
+      outline-offset: 2px;
+    }
+    #mainTabs button.active {
+      border-bottom-color: #2980b9;
+      color: #2980b9;
+      background: white;
+      box-shadow: 0 3px 8px -3px #2980b9aa;
+    }
+
+    /* Main content area */
+    #contentArea {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Panels inside content */
+    .panel {
+      display: none;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .panel.active {
+      display: block;
+    }
+
+    /* Use your existing styles for panels, inputs, buttons, etc. */
+    /* Simplified flex containers for Students Panel */
+    #studentPanel {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    #studentList {
+      overflow-y: auto;
+      max-height: 400px;
+      width: 320px;
+      flex-shrink: 0;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 10px;
+      background: #fafafa;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    #studentForm {
+      flex-grow: 1;
+      max-width: 540px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Reuse your existing styles for inputs, buttons, .student-entry, etc. */
+    .student-entry {
+      background: #f4f8fb;
+      padding: 12px 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    .student-entry:hover {
+      background-color: #d0e6fb;
+    }
+    .student-entry.selected {
+      background-color: #3498db;
+      color: white;
+      box-shadow: 0 0 8px #2980b9aa;
+    }
+
+    /* Calendar Panel styles */
+    #calendarPanel {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+    #calendarHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    #calendarHeader button {
+      width: 40px;
+      padding: 5px;
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      background: #3498db;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    #calendarHeader button:hover {
+      background: #2980b9;
+    }
+    #monthYear {
+      font-size: 20px;
+      font-weight: 700;
+      color: #34495e;
+      user-select: none;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .calendar-grid .day-name {
+      font-weight: 700;
+      text-align: center;
+      padding: 6px 0;
+      color: #7f8c8d;
+      user-select: none;
+    }
+    .calendar-grid .day {
+      background: white;
+      padding: 12px 0;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      user-select: none;
+      outline-offset: 2px;
+    }
+    .calendar-grid .day:hover {
+      background: #3498db;
+      color: white;
+    }
+    .calendar-grid .day.selected {
+      background: #2980b9;
+      color: white;
+      box-shadow: 0 0 10px #2980b9aa;
+    }
+    .calendar-grid .day.inactive {
+      color: #bdc3c7;
+      cursor: default;
+      background: transparent;
+      box-shadow: none;
+    }
+    #selectedDate {
+      margin-top: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #34495e;
+      min-height: 24px;
+      user-select: none;
+    }
+    #calendarNote {
+      margin-top: 10px;
+      flex-grow: 1;
+      font-size: 14px;
+      border-radius: 10px;
+      min-height: 100px;
+      font-family: inherit;
+      resize: vertical;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    #saveCalendarNoteBtn {
+      margin-top: 10px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    #saveCalendarNoteBtn:hover {
+      background: #2980b9;
+    }
+
+    /* Notes & Resources panel */
+    #notePanel {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #ddd;
+      user-select: none;
+    }
+    .tab {
+      flex-grow: 1;
+      text-align: center;
+      padding: 10px 0;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      background: #f0f3f7;
+      color: #7f8c8d;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      border: 1px solid transparent;
+      border-bottom: none;
+      font-size: 15px;
+    }
+    .tab.active {
+      background: white;
+      color: #2980b9;
+      border-color: #ccc #ccc white #ccc;
+      box-shadow: 0 -3px 10px -2px #2980b9aa;
+    }
+    textarea {
+      width: 100%;
+      min-height: 250px;
+      font-size: 14px;
+      border-radius: 10px;
+      font-family: inherit;
+      padding: 10px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+    #resourcesEditorContainer {
+      display: none;
+      flex-direction: column;
+      height: 280px;
+    }
+    #resourcesEditor {
+      flex-grow: 1;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px;
+      font-family: inherit;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      outline: none;
+      cursor: text;
+    }
+    #resourcesLinks a {
+      display: block;
+      color: #3498db;
+      margin-bottom: 6px;
+      text-decoration: underline;
+      cursor: pointer;
+      user-select: text;
+    }
+    #toggleResourcesViewBtn {
+      margin-top: 8px;
+      width: 150px;
+      align-self: flex-start;
+      padding: 8px;
+      background: #3498db;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    #toggleResourcesViewBtn:hover {
+      background: #2980b9;
+    }
+    #saveNotesBtn {
+      margin-top: 15px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    #saveNotesBtn:hover {
+      background: #2980b9;
+    }
+
+    /* Student Profile panel */
+    #studentProfilePanel {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    #studentProfileContent p {
+      font-size: 15px;
+      margin: 8px 0;
+    }
+    #studentProfileContent strong {
+      color: #34495e;
+    }
+
+    /* Logbook panel */
+    #logbookPanel {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    #logEntryForm label {
+      font-weight: 600;
+      margin-top: 10px;
+      display: block;
+      color: #34495e;
+    }
+    #logEntryForm select, 
+    #logEntryForm input, 
+    #logEntryForm textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    #logEntryForm button {
+      margin-top: 12px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    #logEntryForm button:hover {
+      background: #2980b9;
+    }
+    #logEntries h3 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      color: #34495e;
+      font-weight: 700;
+    }
+    #logList {
+      padding-left: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 14px;
+      color: #444;
+    }
+    #logList li {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Main Tabs -->
+  <nav id="mainTabs" role="tablist" aria-label="Main Navigation Tabs">
+    <button role="tab" aria-selected="true" tabindex="0" id="tabStudentsBtn" aria-controls="studentPanel">Students</button>
+    <button role="tab" aria-selected="false" tabindex="-1" id="tabCalendarBtn" aria-controls="calendarPanel">Calendar</button>
+    <button role="tab" aria-selected="false" tabindex="-1" id="tabNotesBtn" aria-controls="notePanel">Notes & Resources</button>
+    <button role="tab" aria-selected="false" tabindex="-1" id="tabProfileBtn" aria-controls="studentProfilePanel">Student Profile</button>
+    <button role="tab" aria-selected="false" tabindex="-1" id="tabLogbookBtn" aria-controls="logbookPanel">Logbook</button>
+  </nav>
+
+  <!-- Content Area -->
+  <main id="contentArea">
+    <!-- STUDENTS -->
+    <section id="studentPanel" class="panel active" role="tabpanel" tabindex="0" aria-labelledby="tabStudentsBtn" aria-live="polite" aria-label="Students Panel">
+      <h2>Students</h2>
+      <div id="studentList" aria-live="polite" aria-label="Student list"></div>
+
+      <form id="studentForm" aria-label="Student detail form" onsubmit="return false;">
+        <label for="inputName">Name</label>
+        <input id="inputName" type="text" autocomplete="off" placeholder="Student name" required />
+
+        <label for="inputParents">Parents' Names</label>
+        <input id="inputParents" type="text" autocomplete="off" placeholder="Parents' full names" />
+
+        <label for="inputAddress">Home Address</label>
+        <input id="inputAddress" type="text" autocomplete="off" placeholder="Home address" />
+
+        <label for="inputContact">Email / Phone Number</label>
+        <input id="inputContact" type="text" autocomplete="off" placeholder="Email or phone" />
+
+        <label for="inputGrade">Grade / Year</label>
+        <input id="inputGrade" type="text" autocomplete="off" placeholder="Grade or Year level" />
+
+        <label for="inputProficiency">Proficiency</label>
+        <input id="inputProficiency" type="text" autocomplete="off" placeholder="Proficiency level (e.g. Beginner)" />
+
+        <label for="inputPayment">Payment per Lesson</label>
+        <input id="inputPayment" type="text" autocomplete="off" placeholder="Payment amount" />
+
+        <label for="inputSubject">Subject(s) Learning</label>
+        <input id="inputSubject" type="text" autocomplete="off" placeholder="Subject(s)" />
+
+        <button id="saveStudentBtn" type="submit">Save Student</button>
+        <button id="newStudentBtn" type="button" style="background:#7f8c8d; margin-top: 5px;">Add New Student</button>
+        <button id="deleteStudentBtn" type="button" style="background:#e74c3c; margin-top: 5px; display:none;">Delete Student</button>
+      </form>
+    </section>
+
+    <!-- CALENDAR -->
+    <section id="calendarPanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabCalendarBtn" aria-live="polite" aria-label="Session Calendar">
+      <h2>Session Calendar</h2>
+      <div id="calendarHeader">
+        <button id="prevMonthBtn" aria-label="Previous Month">&lt;</button>
+        <div id="monthYear" aria-live="polite"></div>
+        <button id="nextMonthBtn" aria-label="Next Month">&gt;</button>
+      </div>
+      <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Calendar days">
+        <!-- Days injected here -->
+      </div>
+      <div id="selectedDate" aria-live="polite">Select a date</div>
+      <textarea id="calendarNote" placeholder="Notes for selected date..."></textarea>
+      <button id="saveCalendarNoteBtn">Save Note</button>
+    </section>
+
+    <!-- NOTES / RESOURCES / SYLLABUSES -->
+    <section id="notePanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabNotesBtn" aria-live="polite" aria-label="Notes and Resources">
+      <h2>Notes & Resources</h2>
+      <div class="tabs" role="tablist" aria-label="Notes, Resources, and Syllabuses Tabs">
+        <div class="tab active" role="tab" aria-selected="true" tabindex="0" data-tab="notes">Notes</div>
+        <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-tab="resources">Resources</div>
+        <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-tab="syllabuses">Syllabuses</div>
+      </div>
+
+      <textarea id="tabNotes" placeholder="Paste lesson notes here..."></textarea>
+
+      <div id="resourcesEditorContainer">
+        <div id="resourcesEditor" contenteditable="true" aria-label="Resources editor"></div>
+        <button id="toggleResourcesViewBtn">View Links</button>
+        <div id="resourcesLinks" aria-live="polite"></div>
+      </div>
+
+      <textarea id="tabSyllabuses" style="display:none;" placeholder="Paste syllabuses here..."></textarea>
+      <button id="saveNotesBtn">Save</button>
+    </section>
+
+    <!-- STUDENT PROFILE -->
+    <section id="studentProfilePanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabProfileBtn" aria-live="polite" aria-label="Student Profile" style="display:none;">
+      <h2>Student Profile</h2>
+      <div id="studentProfileContent">
+        <p><strong>Name:</strong> <span id="profileName"></span></p>
+        <p><strong>Parents:</strong> <span id="profileParents"></span></p>
+        <p><strong>Address:</strong> <span id="profileAddress"></span></p>
+        <p><strong>Contact:</strong> <span id="profileContact"></span></p>
+        <p><strong>Grade:</strong> <span id="profileGrade"></span></p>
+        <p><strong>Proficiency:</strong> <span id="profileProficiency"></span></p>
+        <p><strong>Payment:</strong> <span id="profilePayment"></span></p>
+        <p><strong>Subjects:</strong> <span id="profileSubject"></span></p>
+      </div>
+    </section>
+
+    <!-- LOGBOOK -->
+    <section id="logbookPanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabLogbookBtn" aria-live="polite" aria-label="Logbook Panel" style="display:none;">
+      <h2>Logbook</h2>
+      <form id="logEntryForm" onsubmit="return false;">
+        <label for="logType">Type of Entry</label>
+        <select id="logType" required>
+          <option value="">Select Type...</option>
+          <option>New Student</option>
+          <option>Student Feedback</option>
+          <option>Resource Used</option>
+          <option>Other</option>
+        </select>
+
+        <label for="logDate">Date</label>
+        <input type="date" id="logDate" required />
+
+        <label for="logDetails">Details</label>
+        <textarea id="logDetails" rows="4" placeholder="Enter details..." required></textarea>
+
+        <button id="addLogEntryBtn" type="submit">Add Log Entry</button>
+      </form>
+
+      <div id="logEntries">
+        <h3>Previous Entries</h3>
+        <ul id="logList"></ul>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Tab navigation for main tabs
+    const tabs = document.querySelectorAll('#mainTabs button');
+    const panels = document.querySelectorAll('#contentArea .panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        activateMainTab(tab);
+      });
+
+      tab.addEventListener('keydown', e => {
+        let index = Array.from(tabs).indexOf(document.activeElement);
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          let next = (index + 1) % tabs.length;
+          tabs[next].focus();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          let prev = (index - 1 + tabs.length) % tabs.length;
+          tabs[prev].focus();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          tabs[0].focus();
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          tabs[tabs.length -1].focus();
+        } else if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          activateMainTab(document.activeElement);
+        }
+      });
+    });
+
+    function activateMainTab(tab) {
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+        t.setAttribute('tabindex', '-1');
+      });
+      panels.forEach(p => p.classList.remove('active'));
+
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      tab.setAttribute('tabindex', '0');
+
+      const panel = document.getElementById(tab.getAttribute('aria-controls'));
+      panel.classList.add('active');
+      panel.focus();
+
+      // Special actions on tab change
+      if(panel.id === 'studentProfilePanel') {
+        updateStudentProfileDisplay();
+      }
+    }
+
+    // STUDENT PANEL LOGIC
+    const studentListDiv = document.getElementById('studentList');
+    const studentForm = document.getElementById('studentForm');
+    const saveStudentBtn = document.getElementById('saveStudentBtn');
+    const newStudentBtn = document.getElementById('newStudentBtn');
+    const deleteStudentBtn = document.getElementById('deleteStudentBtn');
+
+    // Inputs
+    const inputName = document.getElementById('inputName');
+    const inputParents = document.getElementById('inputParents');
+    const inputAddress = document.getElementById('inputAddress');
+    const inputContact = document.getElementById('inputContact');
+    const inputGrade = document.getElementById('inputGrade');
+    const inputProficiency = document.getElementById('inputProficiency');
+    const inputPayment = document.getElementById('inputPayment');
+    const inputSubject = document.getElementById('inputSubject');
+
+    let students = JSON.parse(localStorage.getItem('students') || '[]');
+    let selectedStudentIndex = -1;
+
+    function renderStudentList() {
+      studentListDiv.innerHTML = '';
+      students.forEach((s, i) => {
+        const div = document.createElement('div');
+        div.className = 'student-entry' + (i === selectedStudentIndex ? ' selected' : '');
+        div.textContent = s.name || '(Unnamed)';
+        div.tabIndex = 0;
+        div.setAttribute('role', 'button');
+        div.setAttribute('aria-pressed', i === selectedStudentIndex ? 'true' : 'false');
+        div.addEventListener('click', () => {
+          selectStudent(i);
+        });
+        div.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectStudent(i);
+          }
+        });
+        studentListDiv.appendChild(div);
+      });
+    }
+
+    function selectStudent(index) {
+      selectedStudentIndex = index;
+      renderStudentList();
+      fillStudentForm(students[index]);
+      deleteStudentBtn.style.display = 'inline-block';
+    }
+
+    function fillStudentForm(student) {
+      if (!student) {
+        studentForm.reset();
+        deleteStudentBtn.style.display = 'none';
+        selectedStudentIndex = -1;
+        return;
+      }
+      inputName.value = student.name || '';
+      inputParents.value = student.parents || '';
+      inputAddress.value = student.address || '';
+      inputContact.value = student.contact || '';
+      inputGrade.value = student.grade || '';
+      inputProficiency.value = student.proficiency || '';
+      inputPayment.value = student.payment || '';
+      inputSubject.value = student.subject || '';
+    }
+
+    saveStudentBtn.addEventListener('click', () => {
+      const nameVal = inputName.value.trim();
+      if (!nameVal) {
+        alert('Please enter the student\'s name.');
+        inputName.focus();
+        return;
+      }
+      const studentData = {
+        name: nameVal,
+        parents: inputParents.value.trim(),
+        address: inputAddress.value.trim(),
+        contact: inputContact.value.trim(),
+        grade: inputGrade.value.trim(),
+        proficiency: inputProficiency.value.trim(),
+        payment: inputPayment.value.trim(),
+        subject: inputSubject.value.trim()
+      };
+      if (selectedStudentIndex >= 0) {
+        students[selectedStudentIndex] = studentData;
+      } else {
+        students.push(studentData);
+        selectedStudentIndex = students.length - 1;
+      }
+      saveStudents();
+      renderStudentList();
+      selectStudent(selectedStudentIndex);
+      alert('Student saved.');
+    });
+
+    newStudentBtn.addEventListener('click', () => {
+      selectedStudentIndex = -1;
+      fillStudentForm(null);
+      deleteStudentBtn.style.display = 'none';
+      inputName.focus();
+    });
+
+    deleteStudentBtn.addEventListener('click', () => {
+      if (selectedStudentIndex < 0) return;
+      if (confirm(`Delete student "${students[selectedStudentIndex].name}"?`)) {
+        students.splice(selectedStudentIndex, 1);
+        saveStudents();
+        selectedStudentIndex = -1;
+        fillStudentForm(null);
+        renderStudentList();
+        deleteStudentBtn.style.display = 'none';
+      }
+    });
+
+    function saveStudents() {
+      localStorage.setItem('students', JSON.stringify(students));
+    }
+
+    renderStudentList();
+
+    // STUDENT PROFILE PANEL update
+    function updateStudentProfileDisplay() {
+      const profileName = document.getElementById('profileName');
+      const profileParents = document.getElementById('profileParents');
+      const profileAddress = document.getElementById('profileAddress');
+      const profileContact = document.getElementById('profileContact');
+      const profileGrade = document.getElementById('profileGrade');
+      const profileProficiency = document.getElementById('profileProficiency');
+      const profilePayment = document.getElementById('profilePayment');
+      const profileSubject = document.getElementById('profileSubject');
+
+      if (selectedStudentIndex < 0 || !students[selectedStudentIndex]) {
+        profileName.textContent = '—';
+        profileParents.textContent = '—';
+        profileAddress.textContent = '—';
+        profileContact.textContent = '—';
+        profileGrade.textContent = '—';
+        profileProficiency.textContent = '—';
+        profilePayment.textContent = '—';
+        profileSubject.textContent = '—';
+        return;
+      }
+      const s = students[selectedStudentIndex];
+      profileName.textContent = s.name || '—';
+      profileParents.textContent = s.parents || '—';
+      profileAddress.textContent = s.address || '—';
+      profileContact.textContent = s.contact || '—';
+      profileGrade.textContent = s.grade || '—';
+      profileProficiency.textContent = s.proficiency || '—';
+      profilePayment.textContent = s.payment || '—';
+      profileSubject.textContent = s.subject || '—';
+    }
+
+    // CALENDAR PANEL LOGIC
+    const calendarGrid = document.getElementById('calendarGrid');
+    const monthYearLabel = document.getElementById('monthYear');
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+    const calendarNote = document.getElementById('calendarNote');
+    const saveCalendarNoteBtn = document.getElementById('saveCalendarNoteBtn');
+    const selectedDateDisplay = document.getElementById('selectedDate');
+
+    let calendarYear, calendarMonth;
+    let selectedDate = null;
+    let calendarNotes = JSON.parse(localStorage.getItem('calendarNotes') || '{}');
+
+    function loadCurrentMonth() {
+      const now = new Date();
+      calendarYear = now.getFullYear();
+      calendarMonth = now.getMonth();
+      renderCalendar(calendarYear, calendarMonth);
+    }
+
+    function renderCalendar(year, month) {
+      calendarGrid.innerHTML = '';
+
+      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      daysOfWeek.forEach(day => {
+        const div = document.createElement('div');
+        div.className = 'day-name';
+        div.textContent = day;
+        calendarGrid.appendChild(div);
+      });
+
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const firstWeekDay = firstDay.getDay();
+      const daysInMonth = lastDay.getDate();
+
+      // Days from previous month (empty)
+      for(let i=0; i<firstWeekDay; i++) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'day inactive';
+        calendarGrid.appendChild(emptyDiv);
+      }
+
+      // Days of current month
+      for(let d=1; d <= daysInMonth; d++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day';
+        dayDiv.textContent = d;
+        dayDiv.tabIndex = 0;
+        dayDiv.setAttribute('role', 'gridcell');
+        dayDiv.dataset.date = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+
+        if (selectedDate === dayDiv.dataset.date) {
+          dayDiv.classList.add('selected');
+          updateSelectedDateDisplay(selectedDate);
+          calendarNote.value = calendarNotes[selectedDate] || '';
+        }
+
+        dayDiv.addEventListener('click', () => {
+          selectDate(dayDiv.dataset.date);
+        });
+        dayDiv.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectDate(dayDiv.dataset.date);
+          }
+        });
+        calendarGrid.appendChild(dayDiv);
+      }
+
+      monthYearLabel.textContent = new Date(year, month).toLocaleString('default', {month:'long', year:'numeric'});
+    }
+
+    function selectDate(dateStr) {
+      selectedDate = dateStr;
+      // Highlight selected day
+      document.querySelectorAll('#calendarGrid .day.selected').forEach(e => e.classList.remove('selected'));
+      const dayDiv = [...calendarGrid.children].find(el => el.dataset.date === dateStr);
+      if(dayDiv) dayDiv.classList.add('selected');
+
+      calendarNote.value = calendarNotes[selectedDate] || '';
+      updateSelectedDateDisplay(selectedDate);
+    }
+
+    function updateSelectedDateDisplay(dateStr) {
+      selectedDateDisplay.textContent = dateStr ? `Selected date: ${dateStr}` : 'Select a date';
+    }
+
+    prevMonthBtn.addEventListener('click', () => {
+      calendarMonth--;
+      if (calendarMonth < 0) {
+        calendarMonth = 11;
+        calendarYear--;
+      }
+      renderCalendar(calendarYear, calendarMonth);
+      selectedDate = null;
+      calendarNote.value = '';
+      updateSelectedDateDisplay(null);
+    });
+
+    nextMonthBtn.addEventListener('click', () => {
+      calendarMonth++;
+      if (calendarMonth > 11) {
+        calendarMonth = 0;
+        calendarYear++;
+      }
+      renderCalendar(calendarYear, calendarMonth);
+      selectedDate = null;
+      calendarNote.value = '';
+      updateSelectedDateDisplay(null);
+    });
+
+    saveCalendarNoteBtn.addEventListener('click', () => {
+      if (!selectedDate) {
+        alert('Please select a date first.');
+        return;
+      }
+      if (calendarNote.value.trim()) {
+        calendarNotes[selectedDate] = calendarNote.value.trim();
+      } else {
+        delete calendarNotes[selectedDate];
+      }
+      localStorage.setItem('calendarNotes', JSON.stringify(calendarNotes));
+      alert('Note saved.');
+    });
+
+    loadCurrentMonth();
+
+    // NOTES & RESOURCES & SYLLABUSES PANEL LOGIC
+    const noteTabs = document.querySelectorAll('#notePanel .tabs .tab');
+    const tabNotes = document.getElementById('tabNotes');
+    const tabSyllabuses = document.getElementById('tabSyllabuses');
+    const resourcesEditorContainer = document.getElementById('resourcesEditorContainer');
+    const resourcesEditor = document.getElementById('resourcesEditor');
+    const resourcesLinksDiv = document.getElementById('resourcesLinks');
+    const toggleResourcesViewBtn = document.getElementById('toggleResourcesViewBtn');
+    const saveNotesBtn = document.getElementById('saveNotesBtn');
+
+    let resourcesViewLinks = false;
+
+    // Load saved data
+    const notesData = JSON.parse(localStorage.getItem('notesData') || '{}');
+    tabNotes.value = notesData.notes || '';
+    tabSyllabuses.value = notesData.syllabuses || '';
+    resourcesEditor.innerText = notesData.resources || '';
+    renderResourcesLinks();
+
+    noteTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        noteTabs.forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+          t.setAttribute('tabindex', '-1');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        tab.setAttribute('tabindex', '0');
+
+        const type = tab.dataset.tab;
+        if(type === 'notes') {
+          tabNotes.style.display = 'block';
+          resourcesEditorContainer.style.display = 'none';
+          tabSyllabuses.style.display = 'none';
+        } else if (type === 'resources') {
+          tabNotes.style.display = 'none';
+          tabSyllabuses.style.display = 'none';
+          resourcesEditorContainer.style.display = 'flex';
+          updateResourcesView();
+        } else if (type === 'syllabuses') {
+          tabNotes.style.display = 'none';
+          tabSyllabuses.style.display = 'block';
+          resourcesEditorContainer.style.display = 'none';
+        }
+      });
+    });
+
+    toggleResourcesViewBtn.addEventListener('click', () => {
+      resourcesViewLinks = !resourcesViewLinks;
+      updateResourcesView();
+    });
+
+    function updateResourcesView() {
+      if (resourcesViewLinks) {
+        // Show links
+        toggleResourcesViewBtn.textContent = 'Edit Resources';
+        resourcesEditor.style.display = 'none';
+        resourcesLinksDiv.style.display = 'block';
+        renderResourcesLinks();
+      } else {
+        toggleResourcesViewBtn.textContent = 'View Links';
+        resourcesEditor.style.display = 'block';
+        resourcesLinksDiv.style.display = 'none';
+      }
+    }
+
+    function renderResourcesLinks() {
+      resourcesLinksDiv.innerHTML = '';
+      const lines = resourcesEditor.innerText.split('\n').map(l => l.trim()).filter(l => l);
+      lines.forEach(line => {
+        try {
+          let url = line;
+          if(!/^https?:\/\//i.test(url)) url = 'http://' + url;
+          const a = document.createElement('a');
+          a.href = url;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = line;
+          resourcesLinksDiv.appendChild(a);
+        } catch {
+          // invalid url, ignore
+        }
+      });
+    }
+
+    saveNotesBtn.addEventListener('click', () => {
+      notesData.notes = tabNotes.value;
+      notesData.syllabuses = tabSyllabuses.value;
+      notesData.resources = resourcesEditor.innerText;
+      localStorage.setItem('notesData', JSON.stringify(notesData));
+      alert('Notes & Resources saved.');
+    });
+
+    // LOGBOOK PANEL LOGIC
+    const logEntryForm = document.getElementById('logEntryForm');
+    const logTypeSelect = document.getElementById('logType');
+    const logDateInput = document.getElementById('logDate');
+    const logDetailsInput = document.getElementById('logDetails');
+    const addLogEntryBtn = document.getElementById('addLogEntryBtn');
+    const logListUl = document.getElementById('logList');
+
+    let logEntries = JSON.parse(localStorage.getItem('logEntries') || '[]');
+
+    function renderLogEntries() {
+      logListUl.innerHTML = '';
+      if(logEntries.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'No log entries yet.';
+        logListUl.appendChild(li);
+        return;
+      }
+      logEntries.forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `[${entry.date}] (${entry.type}) - ${entry.details}`;
+        logListUl.appendChild(li);
+      });
+    }
+
+    addLogEntryBtn.addEventListener('click', () => {
+      if(!logTypeSelect.value) {
+        alert('Please select the type of entry.');
+        logTypeSelect.focus();
+        return;
+      }
+      if(!logDateInput.value) {
+        alert('Please select the date.');
+        logDateInput.focus();
+        return;
+      }
+      if(!logDetailsInput.value.trim()) {
+        alert('Please enter details.');
+        logDetailsInput.focus();
+        return;
+      }
+      const newEntry = {
+        type: logTypeSelect.value,
+        date: logDateInput.value,
+        details: logDetailsInput.value.trim()
+      };
+      logEntries.push(newEntry);
+      localStorage.setItem('logEntries', JSON.stringify(logEntries));
+      renderLogEntries();
+      logEntryForm.reset();
+      alert('Log entry added.');
+    });
+
+    renderLogEntries();
+
+  </script>
+
+</body>
+</html>
