@@ -545,54 +545,68 @@
     return new Date(year, month+1, 0).getDate();
   }
 
-  function buildCalendar(month, year) {
-    calendarGrid.innerHTML = '';
+function buildCalendar(month, year) {
+  calendarGrid.innerHTML = '';
 
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    dayNames.forEach(dayName => {
-      const div = document.createElement('div');
-      div.className = 'day-name';
-      div.innerText = dayName;
-      calendarGrid.appendChild(div);
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  dayNames.forEach(dayName => {
+    const div = document.createElement('div');
+    div.className = 'day-name';
+    div.innerText = dayName;
+    calendarGrid.appendChild(div);
+  });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const totalDays = daysInMonth(month, year);
+
+  for (let i = 0; i < firstDay; i++) {
+    const div = document.createElement('div');
+    div.className = 'day inactive';
+    calendarGrid.appendChild(div);
+  }
+
+  for (let day = 1; day <= totalDays; day++) {
+    const div = document.createElement('div');
+    div.className = 'day';
+    div.tabIndex = 0;
+    div.innerText = day;
+
+    const dateObj = new Date(year, month, day);
+    const noteKey = getCalendarNoteKey(dateObj);
+    const hasNote = localStorage.getItem(noteKey);
+
+    if (hasNote && hasNote.trim() !== '') {
+      div.style.backgroundColor = '#2ecc71'; // Green for days with notes
+      div.style.color = 'white';
+    }
+
+    if (
+      selectedDate &&
+      year === selectedDate.getFullYear() &&
+      month === selectedDate.getMonth() &&
+      day === selectedDate.getDate()
+    ) {
+      div.classList.add('selected');
+    }
+
+    div.addEventListener('click', () => {
+      selectDate(year, month, day);
     });
 
-    // First day of month (0=Sun..6=Sat)
-    const firstDay = new Date(year, month, 1).getDay();
-    const totalDays = daysInMonth(month, year);
-
-    // Add empty inactive days before first day
-    for(let i = 0; i < firstDay; i++){
-      const div = document.createElement('div');
-      div.className = 'day inactive';
-      calendarGrid.appendChild(div);
-    }
-
-    for(let day = 1; day <= totalDays; day++){
-      const div = document.createElement('div');
-      div.className = 'day';
-      div.tabIndex = 0;
-      div.innerText = day;
-
-      if(selectedDate && year === selectedDate.getFullYear() && month === selectedDate.getMonth() && day === selectedDate.getDate()){
-        div.classList.add('selected');
-      }
-
-      div.addEventListener('click', () => {
+    div.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
         selectDate(year, month, day);
-      });
-      div.addEventListener('keydown', (e) => {
-        if(e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          selectDate(year, month, day);
-        }
-      });
+      }
+    });
 
-      calendarGrid.appendChild(div);
-    }
-
-    const monthName = new Date(year, month).toLocaleString('default', { month: 'long' });
-    monthYearLabel.innerText = `${monthName} ${year}`;
+    calendarGrid.appendChild(div);
   }
+
+  const monthName = new Date(year, month).toLocaleString('default', { month: 'long' });
+  monthYearLabel.innerText = `${monthName} ${year}`;
+}
+
 
   function selectDate(year, month, day) {
     selectedDate = new Date(year, month, day);
