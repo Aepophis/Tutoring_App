@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <title>Tutoring Tracker v4</title>
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #eef2f7;
+      margin: 0; padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    /* Panel containers */
+    .panel {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 20px;
+      flex-grow: 1;
+      flex-basis: 320px;
+      display: flex;
+      flex-direction: column;
+      max-width: 400px;
+      min-width: 320px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    /* Inputs and buttons */
+    input, select, textarea {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+      resize: vertical;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    button:active {
+      background: #1c5980;
+    }
+
+    /* Student List */
+    #studentList {
+      overflow-y: auto;
+      max-height: 300px;
+      margin-bottom: 15px;
+    }
+    .student-entry {
+      background: #f4f8fb;
+      padding: 12px 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    .student-entry:hover {
+      background-color: #d0e6fb;
+    }
+    .student-entry.selected {
+      background-color: #3498db;
+      color: white;
+      box-shadow: 0 0 8px #2980b9aa;
+    }
+    .student-entry strong {
+      color: inherit;
+    }
+
+    /* Student form */
+    #studentForm {
+      display: flex;
+      flex-direction: column;
+    }
+    #studentForm input {
+      margin-bottom: 10px;
+    }
+    #studentForm label {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #34495e;
+    }
+    #studentForm button {
+      margin-top: 10px;
+      align-self: flex-start;
+    }
+
+    /* Calendar Panel */
+    #calendarPanel {
+      max-width: 600px;
+      min-width: 350px;
+      flex-grow: 2;
+      display: flex;
+      flex-direction: column;
+    }
+    #calendarHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    #calendarHeader button {
+      width: 40px;
+      padding: 5px;
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 1;
+    }
+    #monthYear {
+      font-size: 20px;
+      font-weight: 700;
+      color: #34495e;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .calendar-grid .day-name {
+      font-weight: 700;
+      text-align: center;
+      padding: 6px 0;
+      color: #7f8c8d;
+      user-select: none;
+    }
+    .calendar-grid .day {
+      background: white;
+      padding: 12px 0;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      user-select: none;
+    }
+    .calendar-grid .day:hover {
+      background: #3498db;
+      color: white;
+    }
+    .calendar-grid .day.selected {
+      background: #2980b9;
+      color: white;
+      box-shadow: 0 0 10px #2980b9aa;
+    }
+    .calendar-grid .day.inactive {
+      color: #bdc3c7;
+      cursor: default;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    #selectedDate {
+      margin-top: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #34495e;
+      min-height: 24px;
+      user-select: none;
+    }
+
+    #calendarNote {
+      margin-top: 10px;
+      flex-grow: 1;
+      font-size: 14px;
+      border-radius: 10px;
+      min-height: 100px;
+      font-family: inherit;
+    }
+
+    /* Tabs for notes/resources/syllabuses */
+    #notePanel {
+      max-width: 400px;
+      min-width: 320px;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #ddd;
+    }
+    .tab {
+      flex-grow: 1;
+      text-align: center;
+      padding: 10px 0;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      background: #f0f3f7;
+      color: #7f8c8d;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      border: 1px solid transparent;
+      border-bottom: none;
+    }
+    .tab.active {
+      background: white;
+      color: #2980b9;
+      border-color: #ccc #ccc white #ccc;
+      box-shadow: 0 -3px 10px -2px #2980b9aa;
+    }
+
+    textarea {
+      flex-grow: 1;
+      min-height: 250px;
+      font-size: 14px;
+      border-radius: 10px;
+      font-family: inherit;
+    }
+
+    /* Resources editor container */
+    #resourcesEditorContainer {
+      display: none;
+      flex-direction: column;
+      height: 280px;
+    }
+    #resourcesEditor {
+      flex-grow: 1;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px;
+      font-family: inherit;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      outline: none;
+      cursor: text;
+    }
+    #resourcesLinks a {
+      display: block;
+      color: #3498db;
+      margin-bottom: 6px;
+      text-decoration: underline;
+      cursor: pointer;
+      user-select: text;
+    }
+  </style>
+</head>
+<body>
+  <!-- STUDENTS -->
+  <div id="studentPanel" class="panel" aria-label="Students Panel">
+    <h2>Students</h2>
+    <div id="studentList" aria-live="polite" aria-label="Student list"></div>
+
+    <form id="studentForm" aria-label="Student detail form" onsubmit="return false;">
+      <label for="inputName">Name</label>
+      <input id="inputName" type="text" autocomplete="off" placeholder="Student name" required />
+
+      <label for="inputParents">Parents' Names</label>
+      <input id="inputParents" type="text" autocomplete="off" placeholder="Parents' full names" />
+
+      <label for="inputAddress">Home Address</label>
+      <input id="inputAddress" type="text" autocomplete="off" placeholder="Home address" />
+
+      <label for="inputContact">Email / Phone Number</label>
+      <input id="inputContact" type="text" autocomplete="off" placeholder="Email or phone" />
+
+      <label for="inputGrade">Grade / Year</label>
+      <input id="inputGrade" type="text" autocomplete="off" placeholder="Grade or Year level" />
+
+      <label for="inputProficiency">Proficiency</label>
+      <input id="inputProficiency" type="text" autocomplete="off" placeholder="Proficiency level (e.g. Beginner)" />
+
+      <label for="inputPayment">Payment per Lesson</label>
+      <input id="inputPayment" type="text" autocomplete="off" placeholder="Payment amount" />
+
+      <label for="inputSubject">Subject(s) Learning</label>
+      <input id="inputSubject" type="text" autocomplete="off" placeholder="Subject(s)" />
+
+      <button id="saveStudentBtn" type="submit">Save Student</button>
+      <button id="newStudentBtn" type="button" style="background:#7f8c8d; margin-top: 5px;">Add New Student</button>
+      <button id="deleteStudentBtn" type="button" style="background:#e74c3c; margin-top: 5px; display:none;">Delete Student</button>
+    </form>
+  </div>
+
+  <!-- CALENDAR -->
+  <div id="calendarPanel" class="panel" role="region" aria-label="Session Calendar">
+    <h2>Session Calendar</h2>
+    <div id="calendarHeader">
+      <button id="prevMonthBtn" aria-label="Previous Month">&lt;</button>
+      <div id="monthYear" aria-live="polite"></div>
+      <button id="nextMonthBtn" aria-label="Next Month">&gt;</button>
+    </div>
+    <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Calendar days">
+      <!-- Days injected here -->
+    </div>
+    <div id="selectedDate" aria-live="polite">Select a date</div>
+    <textarea id="calendarNote" placeholder="Notes for selected date..."></textarea>
+    <button id="saveCalendarNoteBtn">Save Note</button>
+  </div>
+
+  <!-- NOTES / RESOURCES / SYLLABUSES -->
+  <div id="notePanel" class="panel" role="region" aria-label="Notes and Resources">
+    <h2>Notes & Resources</h2>
+    <div class="tabs" role="tablist">
+      <div class="tab active" role="tab" aria-selected="true" tabindex="0" data-tab="notes">Notes</div>
+      <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-tab="resources">Resources</div>
+      <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-tab="syllabuses">Syllabuses</div>
+    </div>
+
+    <textarea id="tabNotes" placeholder="Paste lesson notes here..."></textarea>
+
+    <div id="resourcesEditorContainer">
+      <div id="resourcesEditor" contenteditable="true" aria-label="Resources editor"></div>
+      <button id="toggleResourcesViewBtn" style="margin-top:8px; width: 150px;">View Links</button>
+      <div id="resourcesLinks" style="margin-top: 10px; max-height: 150px; overflow-y: auto;" aria-live="polite"></div>
+    </div>
+
+    <textarea id="tabSyllabuses" style="display:none;" placeholder="Paste syllabuses here..."></textarea>
+    <button id="saveNotesBtn">Save</button>
+  </div>
+
+<!-- STUDENT PROFILE -->
+<div id="studentProfilePanel" class="panel" role="region" aria-label="Student Profile" style="display:none;">
+  <h2>Student Profile</h2>
+  <div id="studentProfileContent">
+    <p><strong>Name:</strong> <span id="profileName"></span></p>
+    <p><strong>Parents:</strong> <span id="profileParents"></span></p>
+    <p><strong>Address:</strong> <span id="profileAddress"></span></p>
+    <p><strong>Contact:</strong> <span id="profileContact"></span></p>
+    <p><strong>Grade:</strong> <span id="profileGrade"></span></p>
+    <p><strong>Proficiency:</strong> <span id="profileProficiency"></span></p>
+    <p><strong>Payment:</strong> <span id="profilePayment"></span></p>
+    <p><strong>Subjects:</strong> <span id="profileSubject"></span></p>
+  </div>
+</div>
+
+
+
+<script>
+  
+  // --- STUDENTS ---
+  const studentList = document.getElementById('studentList');
+  const studentForm = document.getElementById('studentForm');
+  const saveStudentBtn = document.getElementById('saveStudentBtn');
+  const newStudentBtn = document.getElementById('newStudentBtn');
+  const deleteStudentBtn = document.getElementById('deleteStudentBtn');
+
+  // Inputs
+  const inputs = {
+    name: document.getElementById('inputName'),
+    parents: document.getElementById('inputParents'),
+    address: document.getElementById('inputAddress'),
+    contact: document.getElementById('inputContact'),
+    grade: document.getElementById('inputGrade'),
+    proficiency: document.getElementById('inputProficiency'),
+    payment: document.getElementById('inputPayment'),
+    subject: document.getElementById('inputSubject'),
+  };
+
+  let students = [];
+  let selectedStudentIndex = null;
+
+  function saveStudents() {
+    localStorage.setItem('students', JSON.stringify(students));
+  }
+
+  function loadStudents() {
+    students = JSON.parse(localStorage.getItem('students') || '[]');
+  }
+
+  function renderStudentList() {
+    studentList.innerHTML = '';
+    if(students.length === 0){
+      studentList.innerHTML = `<em>No students added yet.</em>`;
+      clearStudentForm();
+      deleteStudentBtn.style.display = 'none';
+      return;
+    }
+
+    if(selectedStudentIndex === null){
+      // Show summary list: name, grade, subjects
+      students.forEach((s, i) => {
+        const div = document.createElement('div');
+        div.className = 'student-entry';
+        div.tabIndex = 0;
+        div.innerHTML = `<strong>${s.name}</strong> (Grade ${s.grade || '-'})<br>Subjects: ${s.subject || '-'}`;
+        div.onclick = () => selectStudent(i);
+        div.onkeydown = e => {
+          if(e.key === 'Enter' || e.key === ' '){
+            e.preventDefault();
+            selectStudent(i);
+          }
+        };
+        studentList.appendChild(div);
+      });
+      clearStudentForm();
+      deleteStudentBtn.style.display = 'none';
+    } else {
+      // Show list with selected highlighted
+      students.forEach((s, i) => {
+        const div = document.createElement('div');
+        div.className = 'student-entry' + (i === selectedStudentIndex ? ' selected' : '');
+        div.tabIndex = 0;
+        div.innerHTML = `<strong>${s.name}</strong> (Grade ${s.grade || '-'})<br>Subjects: ${s.subject || '-'}`;
+        div.onclick = () => selectStudent(i);
+        div.onkeydown = e => {
+          if(e.key === 'Enter' || e.key === ' '){
+            e.preventDefault();
+            selectStudent(i);
+          }
+        };
+        studentList.appendChild(div);
+      });
+      fillStudentForm(students[selectedStudentIndex]);
+      deleteStudentBtn.style.display = 'inline-block';
+    }
+  }
+
+  function clearStudentForm(){
+    Object.values(inputs).forEach(input => input.value = '');
+    selectedStudentIndex = null;
+    saveStudentBtn.innerText = 'Save Student';
+    deleteStudentBtn.style.display = 'none';
+  }
+
+  function fillStudentForm(student){
+    inputs.name.value = student.name || '';
+    inputs.parents.value = student.parents || '';
+    inputs.address.value = student.address || '';
+    inputs.contact.value = student.contact || '';
+    inputs.grade.value = student.grade || '';
+    inputs.proficiency.value = student.proficiency || '';
+    inputs.payment.value = student.payment || '';
+    inputs.subject.value = student.subject || '';
+    saveStudentBtn.innerText = 'Update Student';
+  }
+
+  function selectStudent(index){
+  selectedStudentIndex = index;
+  renderStudentList();
+  const s = students[index];
+  document.getElementById('profileName').innerText = s.name || '-';
+  document.getElementById('profileParents').innerText = s.parents || '-';
+  document.getElementById('profileAddress').innerText = s.address || '-';
+  document.getElementById('profileContact').innerText = s.contact || '-';
+  document.getElementById('profileGrade').innerText = s.grade || '-';
+  document.getElementById('profileProficiency').innerText = s.proficiency || '-';
+  document.getElementById('profilePayment').innerText = s.payment || '-';
+  document.getElementById('profileSubject').innerText = s.subject || '-';
+  document.getElementById('studentProfilePanel').style.display = 'block';
+}
+
+
+  // Save or update student
+  saveStudentBtn.addEventListener('click', () => {
+    const nameVal = inputs.name.value.trim();
+    if(!nameVal){
+      alert('Please enter a student name.');
+      return;
+    }
+
+    const newStudentData = {
+      name: nameVal,
+      parents: inputs.parents.value.trim(),
+      address: inputs.address.value.trim(),
+      contact: inputs.contact.value.trim(),
+      grade: inputs.grade.value.trim(),
+      proficiency: inputs.proficiency.value.trim(),
+      payment: inputs.payment.value.trim(),
+      subject: inputs.subject.value.trim(),
+    };
+
+    if(selectedStudentIndex === null){
+      // Add new
+      students.push(newStudentData);
+      selectedStudentIndex = students.length - 1;
+    } else {
+      // Update existing
+      students[selectedStudentIndex] = newStudentData;
+    }
+    saveStudents();
+    renderStudentList();
+    alert(selectedStudentIndex === students.length - 1 ? 'Student added!' : 'Student updated!');
+  });
+
+  newStudentBtn.addEventListener('click', () => {
+    selectedStudentIndex = null;
+    renderStudentList();
+  });
+
+  deleteStudentBtn.addEventListener('click', () => {
+    if(selectedStudentIndex === null) return;
+
+    const studentName = students[selectedStudentIndex].name || 'this student';
+    if(confirm(`Are you sure you want to delete ${studentName}? This cannot be undone.`)) {
+      students.splice(selectedStudentIndex, 1);
+      selectedStudentIndex = null;
+      saveStudents();
+      renderStudentList();
+    }
+  });
+
+  loadStudents();
+  renderStudentList();
+
+  // --- CALENDAR ---
+  const calendarGrid = document.getElementById('calendarGrid');
+  const monthYearLabel = document.getElementById('monthYear');
+  const prevMonthBtn = document.getElementById('prevMonthBtn');
+  const nextMonthBtn = document.getElementById('nextMonthBtn');
+  const selectedDateLabel = document.getElementById('selectedDate');
+  const calendarNote = document.getElementById('calendarNote');
+  const saveCalendarNoteBtn = document.getElementById('saveCalendarNoteBtn');
+
+  let today = new Date();
+  let currentMonth = today.getMonth();
+  let currentYear = today.getFullYear();
+  let selectedDate = null;
+
+  function daysInMonth(month, year) {
+    return new Date(year, month+1, 0).getDate();
+  }
+
+  function buildCalendar(month, year) {
+    calendarGrid.innerHTML = '';
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayNames.forEach(dayName => {
+      const div = document.createElement('div');
+      div.className = 'day-name';
+      div.innerText = dayName;
+      calendarGrid.appendChild(div);
+    });
+
+    // First day of month (0=Sun..6=Sat)
+    const firstDay = new Date(year, month, 1).getDay();
+    const totalDays = daysInMonth(month, year);
+
+    // Add empty inactive days before first day
+    for(let i = 0; i < firstDay; i++){
+      const div = document.createElement('div');
+      div.className = 'day inactive';
+      calendarGrid.appendChild(div);
+    }
+
+    for(let day = 1; day <= totalDays; day++){
+      const div = document.createElement('div');
+      div.className = 'day';
+      div.tabIndex = 0;
+      div.innerText = day;
+
+      if(selectedDate && year === selectedDate.getFullYear() && month === selectedDate.getMonth() && day === selectedDate.getDate()){
+        div.classList.add('selected');
+      }
+
+      div.addEventListener('click', () => {
+        selectDate(year, month, day);
+      });
+      div.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectDate(year, month, day);
+        }
+      });
+
+      calendarGrid.appendChild(div);
+    }
+
+    const monthName = new Date(year, month).toLocaleString('default', { month: 'long' });
+    monthYearLabel.innerText = `${monthName} ${year}`;
+  }
+
+  function selectDate(year, month, day) {
+    selectedDate = new Date(year, month, day);
+    selectedDateLabel.innerText = `Selected: ${selectedDate.toDateString()}`;
+    calendarNote.value = localStorage.getItem(getCalendarNoteKey(selectedDate)) || '';
+    buildCalendar(currentMonth, currentYear);
+  }
+
+  function getCalendarNoteKey(date) {
+    // Format YYYY-MM-DD with zero padding
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `calendarNote_${y}-${m}-${d}`;
+  }
+
+  saveCalendarNoteBtn.addEventListener('click', () => {
+    if(!selectedDate) {
+      alert('Please select a date first!');
+      return;
+    }
+    localStorage.setItem(getCalendarNoteKey(selectedDate), calendarNote.value);
+    alert('Note saved!');
+  });
+
+  prevMonthBtn.addEventListener('click', () => {
+    currentMonth--;
+    if(currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    buildCalendar(currentMonth, currentYear);
+  });
+
+  nextMonthBtn.addEventListener('click', () => {
+    currentMonth++;
+    if(currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+    buildCalendar(currentMonth, currentYear);
+  });
+
+  // Initialize calendar
+  buildCalendar(currentMonth, currentYear);
+
+  // --- NOTES / RESOURCES / SYLLABUSES TABS ---
+  const tabs = document.querySelectorAll('.tab');
+  const tabNotes = document.getElementById('tabNotes');
+  const resourcesEditorContainer = document.getElementById('resourcesEditorContainer');
+  const resourcesEditor = document.getElementById('resourcesEditor');
+  const resourcesLinks = document.getElementById('resourcesLinks');
+  const toggleResourcesViewBtn = document.getElementById('toggleResourcesViewBtn');
+  const tabSyllabuses = document.getElementById('tabSyllabuses');
+  const saveNotesBtn = document.getElementById('saveNotesBtn');
+
+  let resourcesViewMode = 'edit'; // 'edit' or 'view'
+
+  function extractLinks(text) {
+    // Simple regex for URLs (http, https)
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const matches = text.match(urlRegex);
+    return matches ? [...new Set(matches)] : [];
+  }
+
+  function showLinks() {
+    const text = resourcesEditor.innerText;
+    const links = extractLinks(text);
+    if(links.length === 0){
+      resourcesLinks.innerHTML = '<em>No valid links found.</em>';
+    } else {
+      resourcesLinks.innerHTML = '';
+      links.forEach(url => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.innerText = url;
+        resourcesLinks.appendChild(a);
+      });
+    }
+    resourcesLinks.style.display = 'block';
+    resourcesEditor.style.display = 'none';
+    toggleResourcesViewBtn.innerText = 'Edit Resources';
+    resourcesViewMode = 'view';
+  }
+
+  function showEditor() {
+    resourcesLinks.style.display = 'none';
+    resourcesEditor.style.display = 'block';
+    toggleResourcesViewBtn.innerText = 'View Links';
+    resourcesViewMode = 'edit';
+  }
+
+  toggleResourcesViewBtn.addEventListener('click', () => {
+    if(resourcesViewMode === 'edit'){
+      showLinks();
+    } else {
+      showEditor();
+    }
+  });
+
+  // Load saved content per tab
+  function loadTabContent() {
+    tabNotes.value = localStorage.getItem('tabNotes') || '';
+    resourcesEditor.innerText = localStorage.getItem('tabResources') || '';
+    tabSyllabuses.value = localStorage.getItem('tabSyllabuses') || '';
+    showEditor();
+  }
+
+  // Save content of active tab on button click
+  saveNotesBtn.addEventListener('click', () => {
+    const activeTab = document.querySelector('.tab.active').dataset.tab;
+    if(activeTab === 'notes') {
+      localStorage.setItem('tabNotes', tabNotes.value);
+    } else if(activeTab === 'resources') {
+      localStorage.setItem('tabResources', resourcesEditor.innerText);
+    } else if(activeTab === 'syllabuses') {
+      localStorage.setItem('tabSyllabuses', tabSyllabuses.value);
+    }
+    alert('Saved!');
+  });
+
+  // Tab switching logic
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      if(tab.classList.contains('active')) return;
+
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+        t.tabIndex = -1;
+      });
+
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      tab.tabIndex = 0;
+
+      const which = tab.dataset.tab;
+      tabNotes.style.display = which === 'notes' ? 'block' : 'none';
+      resourcesEditorContainer.style.display = which === 'resources' ? 'flex' : 'none';
+      tabSyllabuses.style.display = which === 'syllabuses' ? 'block' : 'none';
+    });
+  });
+
+  loadTabContent();
+
+</script>
+<!-- Add this just above </body> tag -->
+<div id="logbookPanel" class="panel" role="region" aria-label="Logbook Panel">
+  <h2>Logbook</h2>
+  <form id="logEntryForm" onsubmit="return false;">
+    <label for="logType">Type of Entry</label>
+    <select id="logType" required>
+      <option value="">Select Type...</option>
+      <option>New Student</option>
+      <option>Student Left</option>
+      <option>Incident</option>
+      <option>General Note</option>
+      <option>Schedule Change</option>
+      <option>Parent Communication</option>
+      <option>Session Summary</option>
+    </select>
+
+    <label for="logStudent">Student</label>
+    <select id="logStudent">
+      <option value="">Select Student (optional)...</option>
+    </select>
+
+    <label for="logDate">Date</label>
+    <input id="logDate" type="date" required />
+
+    <label for="logDetails">Details</label>
+    <textarea id="logDetails" placeholder="Describe what happened or session summary..." required></textarea>
+
+    <button type="submit">Add Log Entry</button>
+  </form>
+
+  <div id="logEntries" style="margin-top: 20px; max-height: 300px; overflow-y: auto;">
+    <h3>Previous Entries</h3>
+    <ul id="logList" style="padding-left: 20px;"></ul>
+  </div>
+</div>
+
+<script>
+  const logType = document.getElementById('logType');
+  const logStudent = document.getElementById('logStudent');
+  const logDate = document.getElementById('logDate');
+  const logDetails = document.getElementById('logDetails');
+  const logList = document.getElementById('logList');
+
+  let logEntries = JSON.parse(localStorage.getItem('logEntries') || '[]');
+
+  function populateStudentDropdown() {
+    const studentData = JSON.parse(localStorage.getItem('students') || '[]');
+    logStudent.innerHTML = '<option value="">Select Student (optional)...</option>';
+    studentData.forEach(s => {
+      const option = document.createElement('option');
+      option.value = s.name;
+      option.textContent = s.name;
+      logStudent.appendChild(option);
+    });
+  }
+
+  function renderLogEntries() {
+    logList.innerHTML = '';
+    if (logEntries.length === 0) {
+      logList.innerHTML = '<em>No log entries yet.</em>';
+      return;
+    }
+
+    logEntries.forEach(entry => {
+      const li = document.createElement('li');
+      li.style.marginBottom = '10px';
+      li.innerHTML = `<strong>${entry.date}</strong> - <em>${entry.type}</em>${entry.student ? ` for <strong>${entry.student}</strong>` : ''}<br>${entry.details}`;
+      logList.appendChild(li);
+    });
+  }
+
+  document.getElementById('logEntryForm').addEventListener('submit', () => {
+    const entry = {
+      type: logType.value,
+      student: logStudent.value.trim(),
+      date: logDate.value,
+      details: logDetails.value.trim(),
+    };
+
+    if (!entry.type || !entry.date || !entry.details) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    logEntries.unshift(entry);
+    localStorage.setItem('logEntries', JSON.stringify(logEntries));
+    renderLogEntries();
+
+    logType.value = '';
+    logStudent.value = '';
+    logDate.value = '';
+    logDetails.value = '';
+    alert('Log entry added!');
+  });
+
+  populateStudentDropdown();
+  renderLogEntries();
+</script>
+
+</body>
+</html>
