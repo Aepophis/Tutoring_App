@@ -2,7 +2,7 @@
 <html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <title>Tutoring Tracker v5 with Tabs</title>
+  <title>Tutoring Tracker v4 with Tabs</title>
   <style>
     /* Reset & base */
     * {
@@ -11,89 +11,108 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #eef2f7;
-      margin: 0; padding: 0;
+      margin: 0; padding: 20px;
       color: #333;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
     }
 
     /* Tabs container */
     #mainTabs {
       display: flex;
-      background: #f0f3f7;
       border-bottom: 2px solid #ddd;
+      margin-bottom: 20px;
       user-select: none;
     }
     #mainTabs button {
-      flex-grow: 1;
-      padding: 14px 0;
-      font-weight: 700;
+      background: none;
       border: none;
-      border-bottom: 3px solid transparent;
-      background: transparent;
-      color: #7f8c8d;
-      cursor: pointer;
-      transition: border-color 0.3s ease, color 0.3s ease;
+      padding: 12px 20px;
       font-size: 16px;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color 0.3s, border-color 0.3s;
     }
+    #mainTabs button:hover,
     #mainTabs button:focus {
-      outline: 3px solid #3498db;
-      outline-offset: 2px;
+      color: #2980b9;
+      outline: none;
     }
     #mainTabs button.active {
-      border-bottom-color: #2980b9;
       color: #2980b9;
-      background: white;
-      box-shadow: 0 3px 8px -3px #2980b9aa;
+      border-bottom-color: #2980b9;
     }
 
-    /* Main content area */
-    #contentArea {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 20px;
-      background: white;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
-    /* Panels inside content */
+    /* Panels */
     .panel {
       display: none;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 20px;
       max-width: 900px;
       margin: 0 auto;
-    }
-    .panel.active {
-      display: block;
-    }
-
-    /* Use your existing styles for panels, inputs, buttons, etc. */
-    /* Simplified flex containers for Students Panel */
-    #studentPanel {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    #studentList {
-      overflow-y: auto;
-      max-height: 400px;
-      width: 320px;
-      flex-shrink: 0;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      padding: 10px;
-      background: #fafafa;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-    }
-    #studentForm {
-      flex-grow: 1;
-      max-width: 540px;
+      min-height: 500px;
+      /* Using flex inside panels as per original */
       display: flex;
       flex-direction: column;
+      gap: 15px;
+      outline: none;
+    }
+    .panel.active {
+      display: flex;
     }
 
-    /* Reuse your existing styles for inputs, buttons, .student-entry, etc. */
+    /* Headings */
+    h2 {
+      margin-top: 0;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    /* Inputs and buttons */
+    input, select, textarea {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+      resize: vertical;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    button:active {
+      background: #1c5980;
+    }
+
+    /* Student List */
+    #studentList {
+      overflow-y: auto;
+      max-height: 300px;
+      margin-bottom: 15px;
+    }
     .student-entry {
       background: #f4f8fb;
       padding: 12px 15px;
@@ -112,11 +131,33 @@
       color: white;
       box-shadow: 0 0 8px #2980b9aa;
     }
+    .student-entry strong {
+      color: inherit;
+    }
 
-    /* Calendar Panel styles */
+    /* Student form */
+    #studentForm {
+      display: flex;
+      flex-direction: column;
+    }
+    #studentForm input {
+      margin-bottom: 10px;
+    }
+    #studentForm label {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #34495e;
+    }
+    #studentForm button {
+      margin-top: 10px;
+      align-self: flex-start;
+    }
+
+    /* Calendar Panel */
     #calendarPanel {
       max-width: 600px;
-      margin: 0 auto;
+      min-width: 350px;
+      flex-grow: 2;
       display: flex;
       flex-direction: column;
     }
@@ -132,21 +173,11 @@
       font-weight: 700;
       font-size: 18px;
       line-height: 1;
-      cursor: pointer;
-      background: #3498db;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      transition: background-color 0.3s ease;
-    }
-    #calendarHeader button:hover {
-      background: #2980b9;
     }
     #monthYear {
       font-size: 20px;
       font-weight: 700;
       color: #34495e;
-      user-select: none;
     }
     .calendar-grid {
       display: grid;
@@ -169,7 +200,6 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       transition: background-color 0.3s ease, color 0.3s ease;
       user-select: none;
-      outline-offset: 2px;
     }
     .calendar-grid .day:hover {
       background: #3498db;
@@ -186,6 +216,7 @@
       background: transparent;
       box-shadow: none;
     }
+
     #selectedDate {
       margin-top: 12px;
       font-weight: 700;
@@ -194,6 +225,7 @@
       min-height: 24px;
       user-select: none;
     }
+
     #calendarNote {
       margin-top: 10px;
       flex-grow: 1;
@@ -201,37 +233,17 @@
       border-radius: 10px;
       min-height: 100px;
       font-family: inherit;
-      resize: vertical;
-      padding: 10px;
-      border: 1px solid #ccc;
-    }
-    #saveCalendarNoteBtn {
-      margin-top: 10px;
-      background: #3498db;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      user-select: none;
-    }
-    #saveCalendarNoteBtn:hover {
-      background: #2980b9;
     }
 
-    /* Notes & Resources panel */
+    /* Notes / Resources / Syllabuses */
     #notePanel {
       max-width: 600px;
-      margin: 0 auto;
+      min-width: 350px;
     }
     .tabs {
       display: flex;
       margin-bottom: 10px;
       border-bottom: 2px solid #ddd;
-      user-select: none;
     }
     .tab {
       flex-grow: 1;
@@ -246,7 +258,6 @@
       transition: background-color 0.3s ease;
       border: 1px solid transparent;
       border-bottom: none;
-      font-size: 15px;
     }
     .tab.active {
       background: white;
@@ -255,15 +266,14 @@
       box-shadow: 0 -3px 10px -2px #2980b9aa;
     }
     textarea {
-      width: 100%;
+      flex-grow: 1;
       min-height: 250px;
       font-size: 14px;
       border-radius: 10px;
       font-family: inherit;
-      padding: 10px;
-      border: 1px solid #ccc;
-      resize: vertical;
     }
+
+    /* Resources editor container */
     #resourcesEditorContainer {
       display: none;
       flex-direction: column;
@@ -288,126 +298,43 @@
       cursor: pointer;
       user-select: text;
     }
-    #toggleResourcesViewBtn {
-      margin-top: 8px;
-      width: 150px;
-      align-self: flex-start;
-      padding: 8px;
-      background: #3498db;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      user-select: none;
-    }
-    #toggleResourcesViewBtn:hover {
-      background: #2980b9;
-    }
-    #saveNotesBtn {
-      margin-top: 15px;
-      background: #3498db;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      user-select: none;
-    }
-    #saveNotesBtn:hover {
-      background: #2980b9;
-    }
 
-    /* Student Profile panel */
-    #studentProfilePanel {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    #studentProfileContent p {
+    /* Student Profile */
+    #studentProfilePanel p {
+      margin: 4px 0;
       font-size: 15px;
-      margin: 8px 0;
     }
-    #studentProfileContent strong {
-      color: #34495e;
+    #studentProfilePanel strong {
+      color: #2980b9;
     }
 
-    /* Logbook panel */
-    #logbookPanel {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    #logEntryForm label {
-      font-weight: 600;
-      margin-top: 10px;
-      display: block;
-      color: #34495e;
-    }
-    #logEntryForm select, 
-    #logEntryForm input, 
-    #logEntryForm textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 14px;
-      resize: vertical;
-      box-sizing: border-box;
-    }
-    #logEntryForm button {
-      margin-top: 12px;
-      background: #3498db;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s ease;
-    }
-    #logEntryForm button:hover {
-      background: #2980b9;
-    }
+    /* Logbook */
     #logEntries h3 {
-      margin-top: 20px;
-      margin-bottom: 10px;
-      color: #34495e;
-      font-weight: 700;
-    }
-    #logList {
-      padding-left: 20px;
-      max-height: 300px;
-      overflow-y: auto;
-      font-size: 14px;
-      color: #444;
+      margin-top: 0;
     }
     #logList li {
       margin-bottom: 10px;
+    }
+    #logbookPanel form > * {
+      margin-bottom: 12px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Main Tabs -->
-  <nav id="mainTabs" role="tablist" aria-label="Main Navigation Tabs">
-    <button role="tab" aria-selected="true" tabindex="0" id="tabStudentsBtn" aria-controls="studentPanel">Students</button>
-    <button role="tab" aria-selected="false" tabindex="-1" id="tabCalendarBtn" aria-controls="calendarPanel">Calendar</button>
-    <button role="tab" aria-selected="false" tabindex="-1" id="tabNotesBtn" aria-controls="notePanel">Notes & Resources</button>
-    <button role="tab" aria-selected="false" tabindex="-1" id="tabProfileBtn" aria-controls="studentProfilePanel">Student Profile</button>
-    <button role="tab" aria-selected="false" tabindex="-1" id="tabLogbookBtn" aria-controls="logbookPanel">Logbook</button>
+  <!-- MAIN TABS -->
+  <nav id="mainTabs" role="tablist" aria-label="Main Sections">
+    <button id="tabStudents" aria-controls="studentPanel" role="tab" aria-selected="true" tabindex="0" class="active">Students</button>
+    <button id="tabCalendar" aria-controls="calendarPanel" role="tab" aria-selected="false" tabindex="-1">Calendar</button>
+    <button id="tabNotes" aria-controls="notePanel" role="tab" aria-selected="false" tabindex="-1">Notes & Resources</button>
+    <button id="tabProfile" aria-controls="studentProfilePanel" role="tab" aria-selected="false" tabindex="-1">Student Profile</button>
+    <button id="tabLogbook" aria-controls="logbookPanel" role="tab" aria-selected="false" tabindex="-1">Logbook</button>
   </nav>
 
-  <!-- Content Area -->
+  <!-- PANELS -->
   <main id="contentArea">
     <!-- STUDENTS -->
-    <section id="studentPanel" class="panel active" role="tabpanel" tabindex="0" aria-labelledby="tabStudentsBtn" aria-live="polite" aria-label="Students Panel">
+    <section id="studentPanel" class="panel active" role="tabpanel" tabindex="0" aria-labelledby="tabStudents">
       <h2>Students</h2>
       <div id="studentList" aria-live="polite" aria-label="Student list"></div>
 
@@ -443,7 +370,7 @@
     </section>
 
     <!-- CALENDAR -->
-    <section id="calendarPanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabCalendarBtn" aria-live="polite" aria-label="Session Calendar">
+    <section id="calendarPanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabCalendar">
       <h2>Session Calendar</h2>
       <div id="calendarHeader">
         <button id="prevMonthBtn" aria-label="Previous Month">&lt;</button>
@@ -459,9 +386,9 @@
     </section>
 
     <!-- NOTES / RESOURCES / SYLLABUSES -->
-    <section id="notePanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabNotesBtn" aria-live="polite" aria-label="Notes and Resources">
+    <section id="notePanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabNotes">
       <h2>Notes & Resources</h2>
-      <div class="tabs" role="tablist" aria-label="Notes, Resources, and Syllabuses Tabs">
+      <div class="tabs" role="tablist">
         <div class="tab active" role="tab" aria-selected="true" tabindex="0" data-tab="notes">Notes</div>
         <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-tab="resources">Resources</div>
         <div class="tab" role="tab" aria-selected="false" tabindex="-1" data-tab="syllabuses">Syllabuses</div>
@@ -471,8 +398,8 @@
 
       <div id="resourcesEditorContainer">
         <div id="resourcesEditor" contenteditable="true" aria-label="Resources editor"></div>
-        <button id="toggleResourcesViewBtn">View Links</button>
-        <div id="resourcesLinks" aria-live="polite"></div>
+        <button id="toggleResourcesViewBtn" style="margin-top:8px; width: 150px;">View Links</button>
+        <div id="resourcesLinks" style="margin-top: 10px; max-height: 150px; overflow-y: auto;" aria-live="polite"></div>
       </div>
 
       <textarea id="tabSyllabuses" style="display:none;" placeholder="Paste syllabuses here..."></textarea>
@@ -480,7 +407,7 @@
     </section>
 
     <!-- STUDENT PROFILE -->
-    <section id="studentProfilePanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabProfileBtn" aria-live="polite" aria-label="Student Profile" style="display:none;">
+    <section id="studentProfilePanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabProfile" style="display:none;">
       <h2>Student Profile</h2>
       <div id="studentProfileContent">
         <p><strong>Name:</strong> <span id="profileName"></span></p>
@@ -495,121 +422,127 @@
     </section>
 
     <!-- LOGBOOK -->
-    <section id="logbookPanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabLogbookBtn" aria-live="polite" aria-label="Logbook Panel" style="display:none;">
+    <section id="logbookPanel" class="panel" role="tabpanel" tabindex="0" aria-labelledby="tabLogbook">
       <h2>Logbook</h2>
       <form id="logEntryForm" onsubmit="return false;">
         <label for="logType">Type of Entry</label>
         <select id="logType" required>
           <option value="">Select Type...</option>
           <option>New Student</option>
-          <option>Student Feedback</option>
-          <option>Resource Used</option>
-          <option>Other</option>
+          <option>Student Left</option>
+          <option>Incident</option>
+          <option>General Note</option>
+          <option>Schedule Change</option>
+          <option>Parent Communication</option>
+          <option>Session Summary</option>
+        </select>
+
+        <label for="logStudent">Student</label>
+        <select id="logStudent">
+          <option value="">Select Student (optional)...</option>
         </select>
 
         <label for="logDate">Date</label>
-        <input type="date" id="logDate" required />
+        <input id="logDate" type="date" required />
 
         <label for="logDetails">Details</label>
-        <textarea id="logDetails" rows="4" placeholder="Enter details..." required></textarea>
+        <textarea id="logDetails" placeholder="Describe what happened or session summary..." required></textarea>
 
-        <button id="addLogEntryBtn" type="submit">Add Log Entry</button>
+        <button type="submit">Add Log Entry</button>
       </form>
 
-      <div id="logEntries">
+      <div id="logEntries" style="margin-top: 20px; max-height: 300px; overflow-y: auto;">
         <h3>Previous Entries</h3>
-        <ul id="logList"></ul>
+        <ul id="logList" style="padding-left: 20px;"></ul>
       </div>
     </section>
   </main>
 
   <script>
-    // Tab navigation for main tabs
+    // --- TAB SWITCHING FOR MAIN PANELS ---
     const tabs = document.querySelectorAll('#mainTabs button');
     const panels = document.querySelectorAll('#contentArea .panel');
 
-    tabs.forEach(tab => {
+    tabs.forEach((tab, index) => {
       tab.addEventListener('click', () => {
-        activateMainTab(tab);
+        activateTab(index);
       });
 
       tab.addEventListener('keydown', e => {
-        let index = Array.from(tabs).indexOf(document.activeElement);
+        let newIndex = null;
         if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          let next = (index + 1) % tabs.length;
-          tabs[next].focus();
+          newIndex = (index + 1) % tabs.length;
         } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          let prev = (index - 1 + tabs.length) % tabs.length;
-          tabs[prev].focus();
+          newIndex = (index - 1 + tabs.length) % tabs.length;
         } else if (e.key === 'Home') {
-          e.preventDefault();
-          tabs[0].focus();
+          newIndex = 0;
         } else if (e.key === 'End') {
-          e.preventDefault();
-          tabs[tabs.length -1].focus();
+          newIndex = tabs.length - 1;
         } else if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          activateMainTab(document.activeElement);
+          activateTab(index);
+        }
+        if (newIndex !== null) {
+          e.preventDefault();
+          tabs[newIndex].focus();
         }
       });
     });
 
-    function activateMainTab(tab) {
-      tabs.forEach(t => {
-        t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
-        t.setAttribute('tabindex', '-1');
+    function activateTab(activeIndex) {
+      tabs.forEach((tab, i) => {
+        const selected = i === activeIndex;
+        tab.classList.toggle('active', selected);
+        tab.setAttribute('aria-selected', selected);
+        tab.setAttribute('tabindex', selected ? '0' : '-1');
+        panels[i].classList.toggle('active', selected);
+        if (selected) panels[i].focus();
       });
-      panels.forEach(p => p.classList.remove('active'));
-
-      tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
-      tab.setAttribute('tabindex', '0');
-
-      const panel = document.getElementById(tab.getAttribute('aria-controls'));
-      panel.classList.add('active');
-      panel.focus();
-
-      // Special actions on tab change
-      if(panel.id === 'studentProfilePanel') {
-        updateStudentProfileDisplay();
+      // When switching tabs, clear calendar selected date to avoid confusion
+      if (activeIndex === 1) {
+        if (!selectedDate) {
+          selectDate(new Date());
+        }
       }
     }
 
-    // STUDENT PANEL LOGIC
+    activateTab(0); // Start on Students tab
+
+    // --- STUDENTS ---
     const studentListDiv = document.getElementById('studentList');
     const studentForm = document.getElementById('studentForm');
     const saveStudentBtn = document.getElementById('saveStudentBtn');
     const newStudentBtn = document.getElementById('newStudentBtn');
     const deleteStudentBtn = document.getElementById('deleteStudentBtn');
 
-    // Inputs
-    const inputName = document.getElementById('inputName');
-    const inputParents = document.getElementById('inputParents');
-    const inputAddress = document.getElementById('inputAddress');
-    const inputContact = document.getElementById('inputContact');
-    const inputGrade = document.getElementById('inputGrade');
-    const inputProficiency = document.getElementById('inputProficiency');
-    const inputPayment = document.getElementById('inputPayment');
-    const inputSubject = document.getElementById('inputSubject');
+    const inputs = {
+      name: document.getElementById('inputName'),
+      parents: document.getElementById('inputParents'),
+      address: document.getElementById('inputAddress'),
+      contact: document.getElementById('inputContact'),
+      grade: document.getElementById('inputGrade'),
+      proficiency: document.getElementById('inputProficiency'),
+      payment: document.getElementById('inputPayment'),
+      subject: document.getElementById('inputSubject'),
+    };
 
     let students = JSON.parse(localStorage.getItem('students') || '[]');
-    let selectedStudentIndex = -1;
+    let selectedStudentIndex = null;
 
-    function renderStudentList() {
+    function saveStudentsToStorage() {
+      localStorage.setItem('students', JSON.stringify(students));
+    }
+
+    function renderStudents() {
       studentListDiv.innerHTML = '';
-      students.forEach((s, i) => {
+      students.forEach((stu, i) => {
         const div = document.createElement('div');
         div.className = 'student-entry' + (i === selectedStudentIndex ? ' selected' : '');
-        div.textContent = s.name || '(Unnamed)';
         div.tabIndex = 0;
         div.setAttribute('role', 'button');
         div.setAttribute('aria-pressed', i === selectedStudentIndex ? 'true' : 'false');
-        div.addEventListener('click', () => {
-          selectStudent(i);
-        });
+        div.innerHTML = `<strong>${stu.name}</strong> - Grade ${stu.grade}`;
+        div.addEventListener('click', () => selectStudent(i));
         div.addEventListener('keydown', e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -618,229 +551,196 @@
         });
         studentListDiv.appendChild(div);
       });
+      populateLogStudentDropdown();
     }
 
     function selectStudent(index) {
       selectedStudentIndex = index;
-      renderStudentList();
-      fillStudentForm(students[index]);
+      const stu = students[index];
+      inputs.name.value = stu.name;
+      inputs.parents.value = stu.parents;
+      inputs.address.value = stu.address;
+      inputs.contact.value = stu.contact;
+      inputs.grade.value = stu.grade;
+      inputs.proficiency.value = stu.proficiency;
+      inputs.payment.value = stu.payment;
+      inputs.subject.value = stu.subject;
+
       deleteStudentBtn.style.display = 'inline-block';
+      renderStudents();
+      updateStudentProfilePanel(stu);
+      activateTab(3); // Automatically switch to Profile tab on select
     }
 
-    function fillStudentForm(student) {
-      if (!student) {
-        studentForm.reset();
-        deleteStudentBtn.style.display = 'none';
-        selectedStudentIndex = -1;
-        return;
+    function clearStudentForm() {
+      selectedStudentIndex = null;
+      for (const key in inputs) {
+        inputs[key].value = '';
       }
-      inputName.value = student.name || '';
-      inputParents.value = student.parents || '';
-      inputAddress.value = student.address || '';
-      inputContact.value = student.contact || '';
-      inputGrade.value = student.grade || '';
-      inputProficiency.value = student.proficiency || '';
-      inputPayment.value = student.payment || '';
-      inputSubject.value = student.subject || '';
+      deleteStudentBtn.style.display = 'none';
+      renderStudents();
+      clearStudentProfilePanel();
     }
 
     saveStudentBtn.addEventListener('click', () => {
-      const nameVal = inputName.value.trim();
-      if (!nameVal) {
-        alert('Please enter the student\'s name.');
-        inputName.focus();
+      const newStudent = {
+        name: inputs.name.value.trim(),
+        parents: inputs.parents.value.trim(),
+        address: inputs.address.value.trim(),
+        contact: inputs.contact.value.trim(),
+        grade: inputs.grade.value.trim(),
+        proficiency: inputs.proficiency.value.trim(),
+        payment: inputs.payment.value.trim(),
+        subject: inputs.subject.value.trim(),
+      };
+      if (!newStudent.name) {
+        alert('Student name is required!');
         return;
       }
-      const studentData = {
-        name: nameVal,
-        parents: inputParents.value.trim(),
-        address: inputAddress.value.trim(),
-        contact: inputContact.value.trim(),
-        grade: inputGrade.value.trim(),
-        proficiency: inputProficiency.value.trim(),
-        payment: inputPayment.value.trim(),
-        subject: inputSubject.value.trim()
-      };
-      if (selectedStudentIndex >= 0) {
-        students[selectedStudentIndex] = studentData;
+      if (selectedStudentIndex !== null) {
+        students[selectedStudentIndex] = newStudent;
       } else {
-        students.push(studentData);
-        selectedStudentIndex = students.length - 1;
+        students.push(newStudent);
       }
-      saveStudents();
-      renderStudentList();
-      selectStudent(selectedStudentIndex);
-      alert('Student saved.');
+      saveStudentsToStorage();
+      renderStudents();
+      clearStudentForm();
+      alert('Student saved!');
     });
 
     newStudentBtn.addEventListener('click', () => {
-      selectedStudentIndex = -1;
-      fillStudentForm(null);
-      deleteStudentBtn.style.display = 'none';
-      inputName.focus();
+      clearStudentForm();
+      activateTab(0);
     });
 
     deleteStudentBtn.addEventListener('click', () => {
-      if (selectedStudentIndex < 0) return;
-      if (confirm(`Delete student "${students[selectedStudentIndex].name}"?`)) {
-        students.splice(selectedStudentIndex, 1);
-        saveStudents();
-        selectedStudentIndex = -1;
-        fillStudentForm(null);
-        renderStudentList();
-        deleteStudentBtn.style.display = 'none';
+      if (selectedStudentIndex !== null) {
+        if (confirm(`Delete student "${students[selectedStudentIndex].name}"?`)) {
+          students.splice(selectedStudentIndex, 1);
+          saveStudentsToStorage();
+          clearStudentForm();
+          alert('Student deleted!');
+        }
       }
     });
 
-    function saveStudents() {
-      localStorage.setItem('students', JSON.stringify(students));
+    function updateStudentProfilePanel(student) {
+      if (!student) return clearStudentProfilePanel();
+      document.getElementById('profileName').textContent = student.name || '';
+      document.getElementById('profileParents').textContent = student.parents || '';
+      document.getElementById('profileAddress').textContent = student.address || '';
+      document.getElementById('profileContact').textContent = student.contact || '';
+      document.getElementById('profileGrade').textContent = student.grade || '';
+      document.getElementById('profileProficiency').textContent = student.proficiency || '';
+      document.getElementById('profilePayment').textContent = student.payment || '';
+      document.getElementById('profileSubject').textContent = student.subject || '';
+    }
+    function clearStudentProfilePanel() {
+      updateStudentProfilePanel({
+        name: '',
+        parents: '',
+        address: '',
+        contact: '',
+        grade: '',
+        proficiency: '',
+        payment: '',
+        subject: '',
+      });
     }
 
-    renderStudentList();
+    // --- CALENDAR ---
 
-    // STUDENT PROFILE PANEL update
-    function updateStudentProfileDisplay() {
-      const profileName = document.getElementById('profileName');
-      const profileParents = document.getElementById('profileParents');
-      const profileAddress = document.getElementById('profileAddress');
-      const profileContact = document.getElementById('profileContact');
-      const profileGrade = document.getElementById('profileGrade');
-      const profileProficiency = document.getElementById('profileProficiency');
-      const profilePayment = document.getElementById('profilePayment');
-      const profileSubject = document.getElementById('profileSubject');
-
-      if (selectedStudentIndex < 0 || !students[selectedStudentIndex]) {
-        profileName.textContent = '—';
-        profileParents.textContent = '—';
-        profileAddress.textContent = '—';
-        profileContact.textContent = '—';
-        profileGrade.textContent = '—';
-        profileProficiency.textContent = '—';
-        profilePayment.textContent = '—';
-        profileSubject.textContent = '—';
-        return;
-      }
-      const s = students[selectedStudentIndex];
-      profileName.textContent = s.name || '—';
-      profileParents.textContent = s.parents || '—';
-      profileAddress.textContent = s.address || '—';
-      profileContact.textContent = s.contact || '—';
-      profileGrade.textContent = s.grade || '—';
-      profileProficiency.textContent = s.proficiency || '—';
-      profilePayment.textContent = s.payment || '—';
-      profileSubject.textContent = s.subject || '—';
-    }
-
-    // CALENDAR PANEL LOGIC
     const calendarGrid = document.getElementById('calendarGrid');
     const monthYearLabel = document.getElementById('monthYear');
     const prevMonthBtn = document.getElementById('prevMonthBtn');
     const nextMonthBtn = document.getElementById('nextMonthBtn');
-    const calendarNote = document.getElementById('calendarNote');
+    const selectedDateDiv = document.getElementById('selectedDate');
+    const calendarNoteTextarea = document.getElementById('calendarNote');
     const saveCalendarNoteBtn = document.getElementById('saveCalendarNoteBtn');
-    const selectedDateDisplay = document.getElementById('selectedDate');
 
-    let calendarYear, calendarMonth;
+    let currentDate = new Date();
     let selectedDate = null;
     let calendarNotes = JSON.parse(localStorage.getItem('calendarNotes') || '{}');
 
-    function loadCurrentMonth() {
-      const now = new Date();
-      calendarYear = now.getFullYear();
-      calendarMonth = now.getMonth();
-      renderCalendar(calendarYear, calendarMonth);
-    }
-
     function renderCalendar(year, month) {
       calendarGrid.innerHTML = '';
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startDayOfWeek = firstDay.getDay(); // Sunday=0, Monday=1...
+      const daysInMonth = lastDay.getDate();
 
-      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      daysOfWeek.forEach(day => {
+      // Show month-year
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      monthYearLabel.textContent = `${monthNames[month]} ${year}`;
+
+      // Weekday headers
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      dayNames.forEach(dayName => {
         const div = document.createElement('div');
         div.className = 'day-name';
-        div.textContent = day;
+        div.textContent = dayName;
         calendarGrid.appendChild(div);
       });
 
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const firstWeekDay = firstDay.getDay();
-      const daysInMonth = lastDay.getDate();
-
-      // Days from previous month (empty)
-      for(let i=0; i<firstWeekDay; i++) {
-        const emptyDiv = document.createElement('div');
-        emptyDiv.className = 'day inactive';
-        calendarGrid.appendChild(emptyDiv);
+      // Fill in blank days before month start
+      for (let i = 0; i < startDayOfWeek; i++) {
+        const blank = document.createElement('div');
+        blank.className = 'day inactive';
+        blank.textContent = '';
+        calendarGrid.appendChild(blank);
       }
 
-      // Days of current month
-      for(let d=1; d <= daysInMonth; d++) {
-        const dayDiv = document.createElement('div');
-        dayDiv.className = 'day';
-        dayDiv.textContent = d;
-        dayDiv.tabIndex = 0;
-        dayDiv.setAttribute('role', 'gridcell');
-        dayDiv.dataset.date = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      // Add day cells
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayCell = document.createElement('div');
+        dayCell.className = 'day';
+        dayCell.textContent = day;
+        dayCell.tabIndex = 0;
+        dayCell.setAttribute('role', 'button');
+        dayCell.setAttribute('aria-label', `${monthNames[month]} ${day}, ${year}`);
+        const dateStr = `${year}-${(month+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
 
-        if (selectedDate === dayDiv.dataset.date) {
-          dayDiv.classList.add('selected');
-          updateSelectedDateDisplay(selectedDate);
-          calendarNote.value = calendarNotes[selectedDate] || '';
+        if (selectedDate === dateStr) {
+          dayCell.classList.add('selected');
         }
 
-        dayDiv.addEventListener('click', () => {
-          selectDate(dayDiv.dataset.date);
+        dayCell.addEventListener('click', () => {
+          selectDate(new Date(year, month, day));
         });
-        dayDiv.addEventListener('keydown', e => {
+        dayCell.addEventListener('keydown', e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            selectDate(dayDiv.dataset.date);
+            selectDate(new Date(year, month, day));
           }
         });
-        calendarGrid.appendChild(dayDiv);
+        calendarGrid.appendChild(dayCell);
       }
-
-      monthYearLabel.textContent = new Date(year, month).toLocaleString('default', {month:'long', year:'numeric'});
     }
 
-    function selectDate(dateStr) {
-      selectedDate = dateStr;
-      // Highlight selected day
-      document.querySelectorAll('#calendarGrid .day.selected').forEach(e => e.classList.remove('selected'));
-      const dayDiv = [...calendarGrid.children].find(el => el.dataset.date === dateStr);
-      if(dayDiv) dayDiv.classList.add('selected');
-
-      calendarNote.value = calendarNotes[selectedDate] || '';
-      updateSelectedDateDisplay(selectedDate);
-    }
-
-    function updateSelectedDateDisplay(dateStr) {
-      selectedDateDisplay.textContent = dateStr ? `Selected date: ${dateStr}` : 'Select a date';
+    function selectDate(date) {
+      selectedDate = date.toISOString().split('T')[0];
+      renderCalendar(date.getFullYear(), date.getMonth());
+      selectedDateDiv.textContent = `Selected: ${date.toDateString()}`;
+      calendarNoteTextarea.value = calendarNotes[selectedDate] || '';
     }
 
     prevMonthBtn.addEventListener('click', () => {
-      calendarMonth--;
-      if (calendarMonth < 0) {
-        calendarMonth = 11;
-        calendarYear--;
-      }
-      renderCalendar(calendarYear, calendarMonth);
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
       selectedDate = null;
-      calendarNote.value = '';
-      updateSelectedDateDisplay(null);
+      selectedDateDiv.textContent = 'Select a date';
+      calendarNoteTextarea.value = '';
     });
 
     nextMonthBtn.addEventListener('click', () => {
-      calendarMonth++;
-      if (calendarMonth > 11) {
-        calendarMonth = 0;
-        calendarYear++;
-      }
-      renderCalendar(calendarYear, calendarMonth);
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
       selectedDate = null;
-      calendarNote.value = '';
-      updateSelectedDateDisplay(null);
+      selectedDateDiv.textContent = 'Select a date';
+      calendarNoteTextarea.value = '';
     });
 
     saveCalendarNoteBtn.addEventListener('click', () => {
@@ -848,167 +748,201 @@
         alert('Please select a date first.');
         return;
       }
-      if (calendarNote.value.trim()) {
-        calendarNotes[selectedDate] = calendarNote.value.trim();
-      } else {
-        delete calendarNotes[selectedDate];
-      }
+      calendarNotes[selectedDate] = calendarNoteTextarea.value.trim();
       localStorage.setItem('calendarNotes', JSON.stringify(calendarNotes));
-      alert('Note saved.');
+      alert('Note saved!');
     });
 
-    loadCurrentMonth();
+    // On load show current month & date
+    window.addEventListener('load', () => {
+      currentDate = new Date();
+      renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+      selectDate(currentDate);
+    });
 
-    // NOTES & RESOURCES & SYLLABUSES PANEL LOGIC
+    // --- NOTES / RESOURCES / SYLLABUSES ---
     const noteTabs = document.querySelectorAll('#notePanel .tabs .tab');
-    const tabNotes = document.getElementById('tabNotes');
-    const tabSyllabuses = document.getElementById('tabSyllabuses');
+    const tabNotesTextarea = document.getElementById('tabNotes');
     const resourcesEditorContainer = document.getElementById('resourcesEditorContainer');
     const resourcesEditor = document.getElementById('resourcesEditor');
     const resourcesLinksDiv = document.getElementById('resourcesLinks');
     const toggleResourcesViewBtn = document.getElementById('toggleResourcesViewBtn');
+    const tabSyllabusesTextarea = document.getElementById('tabSyllabuses');
     const saveNotesBtn = document.getElementById('saveNotesBtn');
 
-    let resourcesViewLinks = false;
+    // Storage keys for notes/resources/syllabuses
+    let notesData = localStorage.getItem('notes') || '';
+    let resourcesData = localStorage.getItem('resources') || '';
+    let syllabusesData = localStorage.getItem('syllabuses') || '';
 
-    // Load saved data
-    const notesData = JSON.parse(localStorage.getItem('notesData') || '{}');
-    tabNotes.value = notesData.notes || '';
-    tabSyllabuses.value = notesData.syllabuses || '';
-    resourcesEditor.innerText = notesData.resources || '';
-    renderResourcesLinks();
+    // Init content
+    tabNotesTextarea.value = notesData;
+    resourcesEditor.innerText = resourcesData;
+    tabSyllabusesTextarea.value = syllabusesData;
 
+    // Show only the active note tab content
     noteTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         noteTabs.forEach(t => {
-          t.classList.remove('active');
-          t.setAttribute('aria-selected', 'false');
-          t.setAttribute('tabindex', '-1');
+          const selected = t === tab;
+          t.classList.toggle('active', selected);
+          t.setAttribute('aria-selected', selected);
+          t.setAttribute('tabindex', selected ? '0' : '-1');
         });
-        tab.classList.add('active');
-        tab.setAttribute('aria-selected', 'true');
-        tab.setAttribute('tabindex', '0');
 
         const type = tab.dataset.tab;
-        if(type === 'notes') {
-          tabNotes.style.display = 'block';
+        if (type === 'notes') {
+          tabNotesTextarea.style.display = 'block';
           resourcesEditorContainer.style.display = 'none';
-          tabSyllabuses.style.display = 'none';
+          tabSyllabusesTextarea.style.display = 'none';
+          toggleResourcesViewBtn.style.display = 'none';
         } else if (type === 'resources') {
-          tabNotes.style.display = 'none';
-          tabSyllabuses.style.display = 'none';
+          tabNotesTextarea.style.display = 'none';
           resourcesEditorContainer.style.display = 'flex';
-          updateResourcesView();
+          tabSyllabusesTextarea.style.display = 'none';
+          toggleResourcesViewBtn.style.display = 'inline-block';
+          showResourcesAsLinks(false);
         } else if (type === 'syllabuses') {
-          tabNotes.style.display = 'none';
-          tabSyllabuses.style.display = 'block';
+          tabNotesTextarea.style.display = 'none';
           resourcesEditorContainer.style.display = 'none';
+          tabSyllabusesTextarea.style.display = 'block';
+          toggleResourcesViewBtn.style.display = 'none';
         }
       });
     });
 
+    // Toggle resources view as text editor or links
+    let showingLinks = false;
     toggleResourcesViewBtn.addEventListener('click', () => {
-      resourcesViewLinks = !resourcesViewLinks;
-      updateResourcesView();
+      showingLinks = !showingLinks;
+      showResourcesAsLinks(showingLinks);
+      toggleResourcesViewBtn.textContent = showingLinks ? 'Edit Text' : 'View Links';
     });
 
-    function updateResourcesView() {
-      if (resourcesViewLinks) {
-        // Show links
-        toggleResourcesViewBtn.textContent = 'Edit Resources';
+    function showResourcesAsLinks(show) {
+      if (show) {
         resourcesEditor.style.display = 'none';
         resourcesLinksDiv.style.display = 'block';
-        renderResourcesLinks();
+        renderResourceLinks(resourcesEditor.innerText);
       } else {
-        toggleResourcesViewBtn.textContent = 'View Links';
         resourcesEditor.style.display = 'block';
         resourcesLinksDiv.style.display = 'none';
       }
     }
 
-    function renderResourcesLinks() {
+    function renderResourceLinks(text) {
       resourcesLinksDiv.innerHTML = '';
-      const lines = resourcesEditor.innerText.split('\n').map(l => l.trim()).filter(l => l);
-      lines.forEach(line => {
-        try {
-          let url = line;
-          if(!/^https?:\/\//i.test(url)) url = 'http://' + url;
+      // Find all URLs in text using regex
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const matches = text.match(urlRegex);
+      if (matches) {
+        matches.forEach(url => {
           const a = document.createElement('a');
           a.href = url;
           a.target = '_blank';
           a.rel = 'noopener noreferrer';
-          a.textContent = line;
+          a.textContent = url;
           resourcesLinksDiv.appendChild(a);
-        } catch {
-          // invalid url, ignore
-        }
-      });
+        });
+      } else {
+        resourcesLinksDiv.textContent = 'No URLs found in resources.';
+      }
     }
 
     saveNotesBtn.addEventListener('click', () => {
-      notesData.notes = tabNotes.value;
-      notesData.syllabuses = tabSyllabuses.value;
-      notesData.resources = resourcesEditor.innerText;
-      localStorage.setItem('notesData', JSON.stringify(notesData));
-      alert('Notes & Resources saved.');
+      // Save whichever tab is active
+      const activeTab = [...noteTabs].find(t => t.classList.contains('active'));
+      if (!activeTab) return;
+      if (activeTab.dataset.tab === 'notes') {
+        notesData = tabNotesTextarea.value;
+        localStorage.setItem('notes', notesData);
+      } else if (activeTab.dataset.tab === 'resources') {
+        resourcesData = resourcesEditor.innerText;
+        localStorage.setItem('resources', resourcesData);
+      } else if (activeTab.dataset.tab === 'syllabuses') {
+        syllabusesData = tabSyllabusesTextarea.value;
+        localStorage.setItem('syllabuses', syllabusesData);
+      }
+      alert('Saved!');
     });
 
-    // LOGBOOK PANEL LOGIC
+    // --- LOGBOOK ---
     const logEntryForm = document.getElementById('logEntryForm');
     const logTypeSelect = document.getElementById('logType');
+    const logStudentSelect = document.getElementById('logStudent');
     const logDateInput = document.getElementById('logDate');
-    const logDetailsInput = document.getElementById('logDetails');
-    const addLogEntryBtn = document.getElementById('addLogEntryBtn');
+    const logDetailsTextarea = document.getElementById('logDetails');
     const logListUl = document.getElementById('logList');
 
     let logEntries = JSON.parse(localStorage.getItem('logEntries') || '[]');
 
+    function populateLogStudentDropdown() {
+      logStudentSelect.innerHTML = '<option value="">Select Student (optional)...</option>';
+      students.forEach(stu => {
+        const opt = document.createElement('option');
+        opt.value = stu.name;
+        opt.textContent = stu.name;
+        logStudentSelect.appendChild(opt);
+      });
+    }
+    populateLogStudentDropdown();
+
     function renderLogEntries() {
       logListUl.innerHTML = '';
-      if(logEntries.length === 0) {
+      if (logEntries.length === 0) {
         const li = document.createElement('li');
         li.textContent = 'No log entries yet.';
         logListUl.appendChild(li);
         return;
       }
-      logEntries.forEach(entry => {
+      logEntries.slice().reverse().forEach(entry => {
         const li = document.createElement('li');
-        li.textContent = `[${entry.date}] (${entry.type}) - ${entry.details}`;
+        li.innerHTML = `<strong>${entry.date}</strong> — <em>${entry.type}</em> ${entry.student ? `for ${entry.student}` : ''}:<br>${entry.details}`;
         logListUl.appendChild(li);
       });
     }
-
-    addLogEntryBtn.addEventListener('click', () => {
-      if(!logTypeSelect.value) {
-        alert('Please select the type of entry.');
-        logTypeSelect.focus();
-        return;
-      }
-      if(!logDateInput.value) {
-        alert('Please select the date.');
-        logDateInput.focus();
-        return;
-      }
-      if(!logDetailsInput.value.trim()) {
-        alert('Please enter details.');
-        logDetailsInput.focus();
-        return;
-      }
-      const newEntry = {
-        type: logTypeSelect.value,
-        date: logDateInput.value,
-        details: logDetailsInput.value.trim()
-      };
-      logEntries.push(newEntry);
-      localStorage.setItem('logEntries', JSON.stringify(logEntries));
-      renderLogEntries();
-      logEntryForm.reset();
-      alert('Log entry added.');
-    });
-
     renderLogEntries();
 
-  </script>
+    logEntryForm.addEventListener('submit', () => {
+      const type = logTypeSelect.value;
+      const date = logDateInput.value;
+      const details = logDetailsTextarea.value.trim();
+      const student = logStudentSelect.value;
 
+      if (!type) {
+        alert('Please select a log entry type.');
+        return;
+      }
+      if (!date) {
+        alert('Please select a date.');
+        return;
+      }
+      if (!details) {
+        alert('Please enter details.');
+        return;
+      }
+
+      logEntries.push({ type, date, student, details });
+      localStorage.setItem('logEntries', JSON.stringify(logEntries));
+      renderLogEntries();
+
+      logTypeSelect.value = '';
+      logDateInput.value = '';
+      logDetailsTextarea.value = '';
+      logStudentSelect.value = '';
+
+      alert('Log entry added!');
+    });
+
+    // Save students and log entries to storage on page unload (backup)
+    window.addEventListener('beforeunload', () => {
+      saveStudentsToStorage();
+      localStorage.setItem('logEntries', JSON.stringify(logEntries));
+      localStorage.setItem('notes', notesData);
+      localStorage.setItem('resources', resourcesData);
+      localStorage.setItem('syllabuses', syllabusesData);
+      localStorage.setItem('calendarNotes', JSON.stringify(calendarNotes));
+    });
+  </script>
 </body>
 </html>
